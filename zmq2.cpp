@@ -138,13 +138,13 @@ namespace zmq
 
   void Socket::bind(const char * address)
   {
-    if(zmq_bind(socket,address))
+    if(!zmq_bind(socket,address))
       throw ZMQException();
   }
 
   void Socket::connect(const char * address)
   {
-    if(zmq_connect(socket,address))
+    if(!zmq_connect(socket,address))
       throw ZMQException();
   }
 
