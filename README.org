@@ -1,5 +1,5 @@
 
-* YA-ZMQ-CPP - Yet Another ZMQ CPP Wrapper
+* ZMQ-2-CPP - Yet Another ZMQ CPP Wrapper
 
 It's one header, one file psudo library, wrote because zmq.hpp makes me vary ill.
 It coulde be one-header file, but for me that is enough.
