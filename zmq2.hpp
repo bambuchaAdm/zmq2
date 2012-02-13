@@ -62,7 +62,7 @@ namespace zmq
     Message();
     Message(size_t);
     Message(void *,size_t, zmq_free_fn *, void * = 0);
-    Message(std::string &)
+    Message(std::string &);
     ~Message();
 
     void move(Message&);    
