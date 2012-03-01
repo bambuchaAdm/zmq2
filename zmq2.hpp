@@ -53,8 +53,8 @@ namespace zmq
     zmq_msg_t message;
 
     Message(const Message &);
+    Message(zmq_msg_t);
     void operator=(const Message &);
-
     void close();
 
   public:
@@ -63,6 +63,7 @@ namespace zmq
     Message(size_t);
     Message(void *,size_t, zmq_free_fn *, void * = 0);
     Message(std::string &);
+    
     ~Message();
 
     void move(Message&);    
@@ -111,6 +112,8 @@ namespace zmq
 
   class Socket 
   {
+    friend class Message;
+
     void * socket;
     void close();
 
@@ -126,7 +129,7 @@ namespace zmq
     void connect(const char *);
     void send(Message&,TransportOptions = NORMAL);
     void recv(Message&,TransportOptions = NORMAL);
-    Message& recv(TransportOptions = NORMAL);
+    Message recv(TransportOptions = NORMAL);
   };
 }
 

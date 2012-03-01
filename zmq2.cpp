@@ -54,6 +54,11 @@ namespace zmq
     zmq_msg_init_data(&message,buff,arg.size(),free_new_buffer,0);
   }
 
+  Message::Message(zmq_msg_t  msg)
+  {
+    message = msg;
+  }
+
   Message::~Message()
   {
     try{
@@ -160,11 +165,16 @@ namespace zmq
       throw ZMQException();
   }
 
-  Message & Socket::recv(TransportOptions options)
+  Message Socket::recv(TransportOptions options)
   {
-    Message message;
-    if(!zmq_recv(socket,&message.message,options))
+    zmq_msg_t message;
+    zmq_msg_init(&message);
+    if(!zmq_recv(socket,&message,options))
+    {
+      zmq_msg_close(&message);
       throw ZMQException();
+    }
+    return message;
   }
 
   
