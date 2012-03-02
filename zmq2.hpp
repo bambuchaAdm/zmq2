@@ -49,32 +49,36 @@ namespace zmq
   class Message
   {
     friend class Socket;
-
-    zmq_msg_t message;
-
-    Message(const Message &);
-    Message(zmq_msg_t);
-    void operator=(const Message &);
-    void close();
-
-  public:
     
+    struct MessagePair
+    {
+      int refs;
+      zmq_msg_t message;
+    };
+
+    MessagePair * msg;
+    
+    void close();
+  public:
+
     Message();
     Message(size_t);
     Message(void *,size_t, zmq_free_fn *, void * = 0);
     Message(std::string &);
+    Message(const Message &);
     
     ~Message();
 
     void move(Message&);    
     void copy(Message&);
 
-    void * data();
+    const void * data();
     size_t size();
 
     operator std::string();
-
+    void operator=(const Message &);
   };
+
 
   enum SocketType{
     PAIR = ZMQ_PAIR,
@@ -101,7 +105,6 @@ namespace zmq
     
     Context(int);
     ~Context();
-    
   };
 
   enum TransportOptions {

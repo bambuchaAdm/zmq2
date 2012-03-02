@@ -33,36 +33,46 @@ namespace zmq
 
   Message::Message()
   {
-    zmq_msg_init(&message);
+    msg = new MessagePair;
+    zmq_msg_init(&msg->message);
   }
 
   Message::Message(size_t size)
   {
-    if(!zmq_msg_init_size(&message,size))
+    msg = new MessagePair;
+    if(!zmq_msg_init_size(&msg->message,size))
+    {
+      delete msg;
       throw ZMQException();
+    }
   }
 
   Message::Message(void * data, size_t size, zmq_free_fn * ffn, void * hing)
   {
-    zmq_msg_init_data(&message,data,size,ffn,hing);
+    msg = new MessagePair;
+    zmq_msg_init_data(&msg->message,data,size,ffn,hing);
+  }
+
+  Message::Message(const Message & old)
+  {
+    msg = old.msg;
+    msg->refs++;
   }
 
   Message::Message(std::string & arg)
   {
     char * buff = new char[arg.size()+1];
     strcpy(buff,arg.c_str());
-    zmq_msg_init_data(&message,buff,arg.size(),free_new_buffer,0);
-  }
-
-  Message::Message(zmq_msg_t  msg)
-  {
-    message = msg;
+    msg = new MessagePair;
+    zmq_msg_init_data(&msg->message,buff,arg.size(),free_new_buffer,0);
   }
 
   Message::~Message()
   {
     try{
-      close();
+      msg->refs--;
+      if(msg->refs)
+	close();
     }
     catch(ZMQException e){
       std::cerr <<e.what()<<std::endl;
@@ -71,28 +81,28 @@ namespace zmq
 
   void Message::close()
   {
-    if(!zmq_msg_close(&message))
+    if(!zmq_msg_close(&msg->message))
       throw ZMQException();
   }
 
   void Message::move(Message & dest)
   {
-    zmq_msg_move(&dest.message,&message);
+    zmq_msg_move(&dest.msg->message,&msg->message);
   }
 
   void Message::copy(Message & dest)
   {
-    zmq_msg_copy(&dest.message,&message);
+    zmq_msg_copy(&dest.msg->message,&msg->message);
   }
 
-  void * Message::data()
+  const void * Message::data()
   {
-    return zmq_msg_data(&message);
+    return zmq_msg_data(&msg->message);
   }
 
   size_t Message::size()
   {
-    return zmq_msg_size(&message);
+    return zmq_msg_size(&msg->message);
   }
 
   Message::operator std::string()
@@ -155,27 +165,23 @@ namespace zmq
 
   void Socket::send(Message & message, TransportOptions options)
   {
-    if(!zmq_send(socket,&message.message,options))
+    if(!zmq_send(socket,&message.msg->message,options))
       throw ZMQException();
   }
 
   void Socket::recv(Message & message, TransportOptions options)
   {
-    if(!zmq_recv(socket,&message.message,options))
+    if(!zmq_recv(socket,&message.msg->message,options))
       throw ZMQException();
   }
 
   Message Socket::recv(TransportOptions options)
   {
-    zmq_msg_t message;
-    zmq_msg_init(&message);
-    if(!zmq_recv(socket,&message,options))
+    Message m;
+    if(!zmq_recv(socket,&m.msg->message,options))
     {
-      zmq_msg_close(&message);
       throw ZMQException();
     }
-    return message;
-  }
-
-  
+    return m;
+  } 
 }
