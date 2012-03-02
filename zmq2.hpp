@@ -20,6 +20,7 @@
 #include <zmq.h>
 #include <exception>
 #include <string>
+#include <iostream>
 
 namespace zmq
 {
@@ -62,7 +63,7 @@ namespace zmq
   public:
 
     Message();
-    Message(size_t);
+    explicit Message(size_t);
     Message(void *,size_t, zmq_free_fn *, void * = 0);
     Message(std::string &);
     Message(const Message &);
@@ -77,7 +78,11 @@ namespace zmq
 
     operator std::string();
     void operator=(const Message &);
+
+    friend std::ostream& operator<<(std::ostream&, Message&);
   };
+
+  std::ostream& operator<<(std::ostream&, Message& );
 
 
   enum SocketType{

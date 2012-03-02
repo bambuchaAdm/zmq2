@@ -110,6 +110,11 @@ namespace zmq
     return std::string((const char *)data(),size());
   }
 
+  std::ostream& operator<<(std::ostream& str, Message& m)
+  {
+    return str<<std::string(m);
+  }
+
   Context::Context(int threads) : context(zmq_init(threads))
   {  }
 
