@@ -71,7 +71,7 @@ namespace zmq
   {
     try{
       msg->refs--;
-      if(msg->refs)
+      if(!msg->refs)
 	close();
     }
     catch(ZMQException e){
